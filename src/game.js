@@ -13,6 +13,8 @@ function random(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
+
+
 //background
 function Bg(game) {
   this.game = game;
@@ -112,7 +114,7 @@ function Bg(game) {
       this.ctx.beginPath()
       this.ctx.arc(x, y, this.circles[c], 0, 2 * Math.PI);
       this.ctx.lineWidth = 2;
-      this.ctx.strokeStyle = 'rgba(50, 106, 222, ' + currentCircle / Object.keys(this.circles).length +')';
+      this.ctx.strokeStyle = 'rgba(74, 184, 239, ' + currentCircle / Object.keys(this.circles).length +')';
       this.ctx.stroke();
       this.ctx.beginPath();
       this.ctx.arc(x, y, this.circles[c], 0, 2 * Math.PI);
@@ -125,8 +127,8 @@ function Bg(game) {
 
     var lineGradient = this.ctx.createRadialGradient(this.game.halfWidth, this.game.halfHeight, 1, this.game.halfWidth, this.game.halfHeight, this.maxSize);
     lineGradient.addColorStop(0, 'rgba(50, 106, 222, 0)');
-    lineGradient.addColorStop(.2, 'rgba(50, 106, 222, 1)');
-    lineGradient.addColorStop(1, '#326ade');
+    lineGradient.addColorStop(.2, 'rgba(74, 184, 239, 1)');
+    lineGradient.addColorStop(1, '#4ab8ef');
 
     for(var l = 0; l < 12 + 1; l++) {
       this.ctx.save();
