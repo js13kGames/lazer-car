@@ -1,3 +1,18 @@
+function makeid(max) {
+  var max = max || 15
+  var text = "";
+  var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+  for (var i = 0; i < max; i++)
+    text += possible.charAt(Math.floor(Math.random() * possible.length));
+
+  return text;
+}
+
+function random(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
 //background
 function Bg(game) {
   this.game = game;
@@ -6,11 +21,41 @@ function Bg(game) {
   this.x = 0;
   this.y = 0;
   this.maxSize = 0;
+  this.gridGapWidth = 3;
+  this.gridGap = parseInt(this.maxSize / this.gridGapWidth);
 
-  this.bgCanvas = document.createElement('canvas');
+  this.setupCircles = function() {
+    this.circles = new Object();
+    for(var c = 0; c < this.gridGap + 1; c++) {
+      if((this.gridGapWidth * (c * c)) * 2 < this.maxSize + 100) {
+        this.circles[makeid()] = (this.gridGapWidth * c * c);
+      }
+    }
+  };
 
-  this.update = function() {
-    this.maxSize = Math.max(this.canvas.width, this.canvas.height);
+  this.setupStars = function() {
+    this.stars = new Object();
+
+    for(var s = 0; s < this.maxSize / 10; s++) {
+      this.stars[makeid()] = {
+        x: random(0, this.game.width),
+        y: random(0, this.game.height),
+        r: random(1,3),
+        o: random(1, 10) / 10
+      }
+    }
+  };
+
+  this.update = function(dt) {
+    this.gridGap = parseInt(this.maxSize / this.gridGapWidth);
+
+    if(Object.keys(this.stars).length === 0) {
+      this.setupStars();
+    }
+
+    if(Object.keys(this.circles).length === 0) {
+      this.setupCircles();
+    }
   };
 
   this.drawGradient = function() {
@@ -26,6 +71,17 @@ function Bg(game) {
     this.ctx.save();
     this.ctx.fillStyle = gradient;
     this.ctx.fillRect(this.x, this.y, this.canvas.width, this.canvas.height);
+    this.ctx.restore();
+  };
+
+  this.drawStars = function() {
+    this.ctx.save();
+    for(var s in this.stars) {
+      this.ctx.beginPath();
+      this.ctx.arc(this.stars[s].x, this.stars[s].y, this.stars[s].r / 2, 0, 2*Math.PI);
+      this.ctx.fillStyle = 'rgba(255, 255, 255, '+ this.stars[s].o +')';
+      this.ctx.fill();
+    }
     this.ctx.restore();
   };
 
@@ -47,53 +103,59 @@ function Bg(game) {
   };
 
   this.drawGrid = function() {
-    var gapWidth = 3;
-    var gap = parseInt(this.maxSize / gapWidth);
-
     var x = this.game.halfWidth,
-        y = this.game.halfHeight;
+        y = this.game.halfHeight,
+        currentCircle = 0;
 
     this.ctx.save();
-    for(var c = 0; c < gap + 1; c++) {
-      if((gapWidth * (c * c)) * 2 < this.maxSize + 100) {
-        this.ctx.beginPath()
-        this.ctx.arc(x, y, (gapWidth * (c * c)), 0, 2 * Math.PI);
-        this.ctx.lineWidth = 2;
-        this.ctx.strokeStyle = '#326ade';
-        this.ctx.stroke();
-        this.ctx.beginPath();
-        this.ctx.arc(x, y, (gapWidth * (c * c)), 0, 2 * Math.PI);
-        this.ctx.lineWidth = 4;
-        this.ctx.strokeStyle = 'rgba(78, 176, 237, .2)';
-        this.ctx.stroke();
-      }
+    for(var c in this.circles) {
+      this.ctx.beginPath()
+      this.ctx.arc(x, y, this.circles[c], 0, 2 * Math.PI);
+      this.ctx.lineWidth = 2;
+      this.ctx.strokeStyle = 'rgba(50, 106, 222, ' + currentCircle / Object.keys(this.circles).length +')';
+      this.ctx.stroke();
+      this.ctx.beginPath();
+      this.ctx.arc(x, y, this.circles[c], 0, 2 * Math.PI);
+      this.ctx.lineWidth = 4;
+      this.ctx.strokeStyle = 'rgba(78, 176, 237, ' + (currentCircle / Object.keys(this.circles).length) / 5 + ')';
+      this.ctx.stroke();
+      currentCircle++;
     }
     this.ctx.restore();
 
-    for(var l = 0; l < 30 + 1; l++) {
+    var lineGradient = this.ctx.createRadialGradient(this.game.halfWidth, this.game.halfHeight, 1, this.game.halfWidth, this.game.halfHeight, this.maxSize);
+    lineGradient.addColorStop(0, 'rgba(50, 106, 222, 0)');
+    lineGradient.addColorStop(.2, 'rgba(50, 106, 222, 1)');
+    lineGradient.addColorStop(1, '#326ade');
+
+    for(var l = 0; l < 12 + 1; l++) {
       this.ctx.save();
-      this.ctx.beginPath()
-      this.ctx.moveTo(x, y);
-      this.ctx.rotate((12 * l) * (Math.PI/180));
-      this.ctx.lineTo(this.maxSize, this.game.halfHeight);
+      this.ctx.beginPath();
+      this.ctx.translate(this.game.halfWidth, this.game.halfHeight);
+      this.ctx.moveTo(0, 0);
+      this.ctx.rotate(30 * l * Math.PI / 180);
+      this.ctx.lineTo(this.maxSize, 0);
+      this.ctx.setTransform(1, 0, 0, 1, 0, 0);
       this.ctx.lineWidth = 2;
-      this.ctx.strokeStyle = '#326ade';
+      this.ctx.strokeStyle = lineGradient;
       this.ctx.stroke();
-      // this.ctx.beginPath();
-      // this.ctx.arc(x, y, (gapWidth * (c * c)), 0, 2 * Math.PI);
-      // this.ctx.lineWidth = 4;
-      // this.ctx.strokeStyle = 'rgba(78, 176, 237, .2)';
-      // this.ctx.stroke();
       this.ctx.restore();
     }
   };
 
-  this.draw = function() {
+  this.draw = function(dt) {
     this.drawGradient();
+    this.drawStars();
     this.drawRadials();
     this.drawGrid();
   };
 
+  this.resize = function() {
+    this.maxSize = Math.max(this.canvas.width, this.canvas.height);
+    this.gridGap = parseInt(this.maxSize / this.gridGapWidth);
+    this.setupStars();
+    this.setupCircles();
+  };
 
   this.update = this.update.bind(this);
   this.draw = this.draw.bind(this);
@@ -122,6 +184,8 @@ function Game() {
     this.canvas.height = this.height = window.innerHeight;
     this.halfWidth = this.canvas.width / 2;
     this.halfHeight = this.canvas.height / 2;
+
+    this.bg.resize();
   };
 
   this.update = function(dt) {
