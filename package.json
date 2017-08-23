@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "live-server --open=\"./src\" --watch=\"./src\" --no-browser",
-    "js": "uglifyjs ./src/game.js -mc > ./lazer-car/game.js",
+    "js": "uglifyjs ./src/game.js -c -m --toplevel > ./lazer-car/game.js",
     "html": "htmlminify -o ./lazer-car/index.html ./src/index.html",
     "css": "uglifycss ./src/style.css --ugly-comments > ./lazer-car/style.css",
     "delete": "rimraf ./lazer-car",
