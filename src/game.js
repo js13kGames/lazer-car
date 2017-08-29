@@ -61,17 +61,17 @@ function Bg(game) {
   };
 
   this.drawGradient = function() {
-    var gradient = this.ctx.createLinearGradient(0, 0, 0, this.canvas.height);
-    gradient.addColorStop(0, '#441541');
-    gradient.addColorStop(.48, '#441541');
-    gradient.addColorStop(.499, '#f742a3');
-    gradient.addColorStop(.5, '#fa71b9');
-    gradient.addColorStop(.501, '#f742a3');
-    gradient.addColorStop(.52, '#271126');
-    gradient.addColorStop(1, '#271126');
+    this.gradient = this.ctx.createLinearGradient(0, 0, 0, this.canvas.height);
+    this.gradient.addColorStop(0, '#441541');
+    this.gradient.addColorStop(.48, '#441541');
+    this.gradient.addColorStop(.499, '#f742a3');
+    this.gradient.addColorStop(.5, '#fa71b9');
+    this.gradient.addColorStop(.501, '#f742a3');
+    this.gradient.addColorStop(.52, '#271126');
+    this.gradient.addColorStop(1, '#271126');
     
     this.ctx.save();
-    this.ctx.fillStyle = gradient;
+    this.ctx.fillStyle = this.gradient;
     this.ctx.fillRect(this.x, this.y, this.canvas.width, this.canvas.height);
     this.ctx.restore();
   };
@@ -164,6 +164,74 @@ function Bg(game) {
   return this;
 }
 
+function Obstacle(game) {
+  this.game = game;
+  this.x = 0;
+  this.y = 0;
+  this.width = 40;
+  this.height = 50;
+
+  // Types:
+  // 0: QUARTZ
+  // 1: QUBIC
+  // 2: LONG
+  // 3: DIAMOND
+  // 4: STONE
+  // 5: TRINGLE
+
+  this.quartz = function(dt) {
+    this.gradient = this.game.ctx.createLinearGradient(0, 0, 10, 0);
+    this.gradient.addColorStop(0, '#943cf2');
+    this.gradient.addColorStop(.5, '#f1b53b');
+    this.gradient.addColorStop(1, '#ffaaaa');
+
+
+    var scale  = 20;
+    this.game.ctx.translate(this.game.halfWidth, this.game.halfHeight);
+    this.game.ctx.beginPath();
+    this.game.ctx.scale(scale, scale);
+    this.game.ctx.moveTo(5, 0);
+    this.game.ctx.lineTo(8, 3);
+    this.game.ctx.lineTo(8, 12);
+    this.game.ctx.lineTo(5, 14);
+    this.game.ctx.lineTo(2, 13);
+    this.game.ctx.lineTo(0, 11);
+    this.game.ctx.lineTo(1, 5);
+    this.game.ctx.lineTo(3, 2);
+    this.game.ctx.lineTo(5, 0);
+    this.game.ctx.lineTo(5, 14);
+    this.game.ctx.moveTo(3, 2);
+    this.game.ctx.lineTo(5, 4);
+    this.game.ctx.lineTo(8, 3);
+    this.game.ctx.moveTo(3, 2);
+    this.game.ctx.lineTo(3, 6);
+    this.game.ctx.lineTo(5, 14);
+    this.game.ctx.moveTo(1, 5);
+    this.game.ctx.lineTo(3, 6);
+    this.game.ctx.lineTo(2, 13);
+    this.game.ctx.moveTo(5, 4);
+    this.game.ctx.lineTo(8, 12);
+    this.game.ctx.lineWidth = 1/scale;
+    this.game.ctx.strokeStyle = '#fff';
+    this.game.ctx.fillStyle = this.gradient;
+    this.game.ctx.fill();
+    this.game.ctx.stroke();
+  }
+
+  this.render = function() {
+    
+  };
+
+  this.draw = function(dt) {
+    this.game.ctx.save();
+    this.quartz(dt);
+    this.game.ctx.restore();
+  };
+
+  this.render();
+  this.quartz = this.quartz.bind(this);
+}
+
 //game object
 function Game() {
   this.canvas = document.querySelector('#game');
@@ -173,6 +241,8 @@ function Game() {
   this.halfHeight = this.canvas.height / 2;
 
   this.bg = new Bg(this);
+
+  this.o = new Obstacle(this);
 
   this.run = function() {
     this.resize();
@@ -196,6 +266,7 @@ function Game() {
 
   this.draw = function(dt) {
     this.bg.draw()
+    this.o.draw();
   };
 
   this.loop = function() {
