@@ -181,15 +181,31 @@ function Obstacle(game) {
 
   this.quartz = function(dt) {
     this.gradient = this.game.ctx.createLinearGradient(0, 0, 10, 0);
-    this.gradient.addColorStop(0, '#943cf2');
-    this.gradient.addColorStop(.5, '#f1b53b');
-    this.gradient.addColorStop(1, '#ffaaaa');
+    this.gradient.addColorStop(0, '#4e60aa');
+    this.gradient.addColorStop(.5, '#f061a3');
+    this.gradient.addColorStop(1, '#f97862');
 
 
-    var scale  = 20;
+    var scale  = 45;
     this.game.ctx.translate(this.game.halfWidth, this.game.halfHeight);
-    this.game.ctx.beginPath();
+
     this.game.ctx.scale(scale, scale);
+
+    this.game.ctx.beginPath();
+    this.game.ctx.moveTo(5, 0);
+    this.game.ctx.lineTo(8, 3);
+    this.game.ctx.lineTo(8, 12);
+    this.game.ctx.lineTo(5, 14);
+    this.game.ctx.lineTo(2, 13);
+    this.game.ctx.lineTo(0, 11);
+    this.game.ctx.lineTo(1, 5);
+    this.game.ctx.lineTo(3, 2);
+    this.game.ctx.lineTo(5, 0);
+    this.game.ctx.fillStyle = this.gradient;
+    this.game.ctx.fill();
+    
+
+    this.game.ctx.beginPath();
     this.game.ctx.moveTo(5, 0);
     this.game.ctx.lineTo(8, 3);
     this.game.ctx.lineTo(8, 12);
@@ -211,10 +227,8 @@ function Obstacle(game) {
     this.game.ctx.lineTo(2, 13);
     this.game.ctx.moveTo(5, 4);
     this.game.ctx.lineTo(8, 12);
-    this.game.ctx.lineWidth = 1/scale;
-    this.game.ctx.strokeStyle = '#fff';
-    this.game.ctx.fillStyle = this.gradient;
-    this.game.ctx.fill();
+    this.game.ctx.lineWidth = 2/scale;
+    this.game.ctx.strokeStyle = '#f742a3';
     this.game.ctx.stroke();
   }
 
