@@ -14,6 +14,121 @@ function random(min, max) {
 }
 
 
+// Vector2 - https://gist.github.com/edwerner/3446102
+var Vector2 = function () {
+  this._x = 0;
+  this._y = 0;
+  this.DEGRAD = 0;
+};
+
+Vector2.prototype.initialize = function (x, y) {
+  _x = x;
+  _y = y;
+};
+
+Vector2.prototype.getX = function () {
+  return _x;
+};
+
+Vector2.prototype.setX = function (x) {
+  _x = x;
+};
+
+Vector2.prototype.getY = function () {
+  return _y;
+};
+
+Vector2.prototype.setY = function (y) {
+  _y = y;
+};
+
+// ------------------- public methods ------------------- //
+
+Vector2.prototype.add = function (vector) {
+  return new Vector2(_x + vector.x, _y + vector.y);
+};
+
+Vector2.prototype.subtract = function (vector) {
+  return new Vector2(_x - vector.x, _y - vector.y);
+};
+
+Vector2.prototype.multiply = function (vector) {
+  return new Vector2(_x * vector.x, _y * vector.y);
+};
+
+Vector2.prototype.divide = function (vector) {
+  return new Vector2(_x / vector.x, _y / vector.y);
+};
+
+Vector2.prototype.distance = function (vector) {
+  var deltaX = _x - vector.x;
+  var deltaY = _y - vector.y;
+  return Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+};
+
+Vector2.prototype.distanceSqr = function (vector) {
+  var deltaX = _x - vector.x;
+  var deltaY = _y - vector.y;
+  return (deltaX * deltaX + deltaY * deltaY);
+};
+
+Vector2.prototype.magnitude = function () {
+  return Math.sqrt(_x * _x + _y * _y);
+};
+
+Vector2.prototype.normalize = function () {
+  var mag = Math.sqrt(_x * _x + _y * _y);
+
+  if (mag === 0) {
+    _x = 0;
+    _y = 0;
+  } else {
+    _x = _x / mag;
+    _y = _y / mag;
+  }
+};
+
+Vector2.prototype.getNormalized = function () {
+  var mag = Matn.sqrt(_x * _x + _y * _y);
+  return new Vector2(_x / mag, _y / mag);
+};
+
+Vector2.prototype.getAngle = function () {
+  return Math.atan2(_y, _x) * 180 / Math.PI;
+};
+
+Vector2.prototype.degToVec = function (deg) {
+  var rad = deg * DEGRAD;
+  return new Vector2(Math.cos(rad), Math.sin(rad));
+};
+
+Vector2.prototype.radToVec = function () {
+  return new Vector2(Math.sin(rad), Math.cos(rad));
+};
+
+// ---------------- additional vector methods ---------------- //
+
+Vector2.prototype.dot = function (vector) {
+  return (_x * vector.x + _y * vector.y);
+};
+
+Vector2.prototype.rotate = function (deg) {
+  var rad = deg * DEGRAD;
+  var cos = Math.cos(rad);
+  var sin = Math.sin(rad);
+  _x = _x * cos - _y * sin;
+  _y = _y * cos + _x * sin;
+};
+
+Vector2.prototype.perpRight = function () {
+  return new Vector2(-_y, _x);
+};
+
+Vector2.prototype.toString = function () {
+  return ("x : " + int(_x * 100) / 100 + ", \ty : " + int(_y * 100) / 100);
+};
+
+
 
 //background
 function Bg(game) {
@@ -166,10 +281,15 @@ function Bg(game) {
 
 function Obstacle(game) {
   this.game = game;
-  this.x = 0;
-  this.y = 0;
+  this.x = this.startX = 0;
+  this.y = this.startY = 0;
+  this.speed = 100;
   this.width = 40;
   this.height = 50;
+  this.moving = true;
+  this.scale = 1;
+  // this.destX = (this.game.canvas.width - (this.game.canvas.width / 2)) - this.game.halfWidth;
+  // this.destY = this.game.canvas.height - this.game.halfHeight;
 
   // Types:
   // 0: QUARTZ
@@ -184,12 +304,11 @@ function Obstacle(game) {
     this.gradient.addColorStop(0, '#4e60aa');
     this.gradient.addColorStop(.5, '#f061a3');
     this.gradient.addColorStop(1, '#f97862');
+    this.scale += dt;
 
+    this.game.ctx.translate(this.x, this.y);
 
-    var scale  = 45;
-    this.game.ctx.translate(this.game.halfWidth, this.game.halfHeight);
-
-    this.game.ctx.scale(scale, scale);
+    this.game.ctx.scale(this.scale, this.scale);
 
     this.game.ctx.beginPath();
     this.game.ctx.moveTo(5, 0);
@@ -227,22 +346,39 @@ function Obstacle(game) {
     this.game.ctx.lineTo(2, 13);
     this.game.ctx.moveTo(5, 4);
     this.game.ctx.lineTo(8, 12);
-    this.game.ctx.lineWidth = 2/scale;
-    this.game.ctx.strokeStyle = '#f742a3';
+    this.game.ctx.lineWidth = 2/this.scale;
+    this.game.ctx.strokeStyle = '#fcbfde';
     this.game.ctx.stroke();
   }
 
-  this.render = function() {
-    
+  this.update = function(dt) {
+    if(this.moving && this.distance) {
+      this.x += this.directionX * this.speed * dt;
+      this.y += this.directionY * this.speed * dt;
+      if(Math.sqrt(Math.pow(this.x - this.startX,2) + Math.pow(this.x - this.startY,2)) >= this.distance) {
+        this.x = this.endX;
+        this.y = this.endY;
+        this.moving = false;
+      }
+    }
+  };
+
+  this.resize = function() {
+    this.endX = this.game.canvas.width;
+    this.endY = this.game.canvas.height;
+    this.distance = Math.sqrt(Math.pow(this.endX - this.startX, 2) + Math.pow(this.endY - this.startY, 2));
+    this.directionX = (this.endX - this.startX) / this.distance;
+    this.directionY = (this.endY- this.startY) / this.distance;
   };
 
   this.draw = function(dt) {
-    this.game.ctx.save();
-    this.quartz(dt);
-    this.game.ctx.restore();
+    if(this.moving) {
+      this.game.ctx.save();
+      this.quartz(dt);
+      this.game.ctx.restore();
+    }
   };
 
-  this.render();
   this.quartz = this.quartz.bind(this);
 }
 
@@ -272,15 +408,17 @@ function Game() {
     this.halfHeight = this.canvas.height / 2;
 
     this.bg.resize();
+    this.o.resize();
   };
 
   this.update = function(dt) {
     this.bg.update(dt);
+    this.o.update(dt);
   }
 
   this.draw = function(dt) {
     this.bg.draw()
-    this.o.draw();
+    this.o.draw(dt);
   };
 
   this.loop = function() {
