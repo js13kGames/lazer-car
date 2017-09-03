@@ -281,9 +281,9 @@ function Bg(game) {
 
 function Obstacle(game) {
   this.game = game;
-  this.x = this.startX = 0;
-  this.y = this.startY = 0;
-  this.speed = 100;
+  this.x = this.startX = this.game.halfWidth;
+  this.y = this.startY = this.game.halfHeight;
+  this.speed = 150;
   this.width = 40;
   this.height = 50;
   this.moving = true;
@@ -304,11 +304,11 @@ function Obstacle(game) {
     this.gradient.addColorStop(0, '#4e60aa');
     this.gradient.addColorStop(.5, '#f061a3');
     this.gradient.addColorStop(1, '#f97862');
-    this.scale += dt;
+    this.scale += dt * 5;
 
     this.game.ctx.translate(this.x, this.y);
-
     this.game.ctx.scale(this.scale, this.scale);
+    this.game.ctx.rotate(45 * Math.PI / 180);
 
     this.game.ctx.beginPath();
     this.game.ctx.moveTo(5, 0);
@@ -356,14 +356,17 @@ function Obstacle(game) {
       this.x += this.directionX * this.speed * dt;
       this.y += this.directionY * this.speed * dt;
       if(Math.sqrt(Math.pow(this.x - this.startX,2) + Math.pow(this.x - this.startY,2)) >= this.distance) {
-        this.x = this.endX;
-        this.y = this.endY;
-        this.moving = false;
+        this.x = this.game.halfWidth;
+        this.y = this.game.halfHeight;
+        this.scale = 1;
+        // this.moving = false;
       }
     }
   };
 
   this.resize = function() {
+    this.x = this.startX = this.game.halfWidth;
+    this.y = this.startY = this.game.halfHeight;
     this.endX = this.game.canvas.width;
     this.endY = this.game.canvas.height;
     this.distance = Math.sqrt(Math.pow(this.endX - this.startX, 2) + Math.pow(this.endY - this.startY, 2));
