@@ -1,14 +1,3 @@
-function makeid(max) {
-  var max = max || 15
-  var text = "";
-  var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-
-  for (var i = 0; i < max; i++)
-    text += possible.charAt(Math.floor(Math.random() * possible.length));
-
-  return text;
-}
-
 function random(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
@@ -25,35 +14,35 @@ function Bg(game) {
   this.gridGap = parseInt(this.maxSize / this.gridGapWidth);
 
   this.setupCircles = function() {
-    this.circles = new Object();
+    this.circles = [];
     for(var c = 0; c < this.gridGap + 1; c++) {
       if((this.gridGapWidth * (c * c)) * 2 < this.maxSize + 100) {
-        this.circles[makeid()] = (this.gridGapWidth * c * c);
+        this.circles.push(this.gridGapWidth * c * c);
       }
     }
   };
 
   this.setupStars = function() {
-    this.stars = new Object();
+    this.stars = [];
 
     for(var s = 0; s < this.maxSize / 10; s++) {
-      this.stars[makeid()] = {
+      this.stars.push({
         x: random(0, this.game.width),
         y: random(0, this.game.height),
         r: random(1,3),
         o: random(1, 10) / 10
-      }
+      });
     }
   };
 
   this.update = function(dt) {
     this.gridGap = parseInt(this.maxSize / this.gridGapWidth);
 
-    if(Object.keys(this.stars).length === 0) {
+    if(this.stars.length === 0) {
       this.setupStars();
     }
 
-    if(Object.keys(this.circles).length === 0) {
+    if(this.circles.length === 0) {
       this.setupCircles();
     }
   };
@@ -166,28 +155,14 @@ function Obstacle(game) {
   this.game = game;
   this.x = this.startX = this.game.halfWidth;
   this.y = this.startY = this.game.halfHeight;
-  this.speed = 150;
+  this.speed = 100;
   this.width = 40;
   this.height = 50;
   this.moving = true;
   this.scale = 1;
-  // this.destX = (this.game.canvas.width - (this.game.canvas.width / 2)) - this.game.halfWidth;
-  // this.destY = this.game.canvas.height - this.game.halfHeight;
 
-  // Types:
-  // 0: QUARTZ
-  // 1: QUBIC
-  // 2: LONG
-  // 3: DIAMOND
-  // 4: STONE
-  // 5: TRINGLE
-
-  this.quartz = function(dt) {
-    this.gradient = this.game.ctx.createLinearGradient(0, 0, 10, 0);
-    this.gradient.addColorStop(0, '#4e60aa');
-    this.gradient.addColorStop(.5, '#f061a3');
-    this.gradient.addColorStop(1, '#f97862');
-    this.scale += dt * 5;
+  this.render = function(dt) {
+    this.scale += dt * 4;
 
     this.game.ctx.translate(this.x, this.y);
     this.game.ctx.scale(this.scale, this.scale);
@@ -203,8 +178,13 @@ function Obstacle(game) {
     this.game.ctx.lineTo(1, 5);
     this.game.ctx.lineTo(3, 2);
     this.game.ctx.lineTo(5, 0);
-    this.game.ctx.fillStyle = this.gradient;
+    this.game.ctx.fillStyle = 'rgba(240, 97, 163, .5)';
     this.game.ctx.fill();
+
+    this.gradient = this.game.ctx.createLinearGradient(10, 0, 0, 10);
+    this.gradient.addColorStop(0, '#4e60aa');
+    this.gradient.addColorStop(.5, '#f061a3');
+    this.gradient.addColorStop(1, '#f97862');
     
 
     this.game.ctx.beginPath();
@@ -230,9 +210,9 @@ function Obstacle(game) {
     this.game.ctx.moveTo(5, 4);
     this.game.ctx.lineTo(8, 12);
     this.game.ctx.lineWidth = 2/this.scale;
-    this.game.ctx.strokeStyle = '#fcbfde';
+    this.game.ctx.strokeStyle = this.gradient;
     this.game.ctx.stroke();
-  }
+  };
 
   this.update = function(dt) {
     if(this.moving && this.distance) {
@@ -260,12 +240,10 @@ function Obstacle(game) {
   this.draw = function(dt) {
     if(this.moving) {
       this.game.ctx.save();
-      this.quartz(dt);
+      this.render(dt);
       this.game.ctx.restore();
     }
   };
-
-  this.quartz = this.quartz.bind(this);
 }
 
 // states
