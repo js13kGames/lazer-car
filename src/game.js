@@ -270,6 +270,35 @@ function Obstacle(game) {
 
 // states
 
+function Gameplay(game) {
+  this.game = game;
+  this.obstacles = [];
+  this.entities = [];
+
+  this.bg = new Bg(this.game);
+  this.o = new Obstacle(this.game);
+
+
+  this.update = function(dt) {
+    this.bg.update(dt);
+    this.o.update(dt);
+  };
+
+  this.draw = function(dt) {
+    this.bg.draw()
+    this.o.draw(dt);
+  };
+
+  this.resize = function() {
+    this.bg.resize();
+    this.o.resize();
+  };
+
+  this.destroy = function() {
+
+  };
+}
+
 // game object
 function Game() {
   this.canvas = document.querySelector('#game');
@@ -277,10 +306,13 @@ function Game() {
   this.lastTime = (new Date()).getTime();
   this.halfWidth = this.canvas.width / 2;
   this.halfHeight = this.canvas.height / 2;
+  this.states = {
+    // menu: MainMenu,
+    gameplay: Gameplay,
+  };
+  this.currentState = null;
 
-  this.bg = new Bg(this);
-
-  this.o = new Obstacle(this);
+  
 
   this.run = function() {
     this.resize();
@@ -294,19 +326,21 @@ function Game() {
     this.canvas.height = this.height = window.innerHeight;
     this.halfWidth = this.canvas.width / 2;
     this.halfHeight = this.canvas.height / 2;
+    this.currentState.resize();
+  };
 
-    this.bg.resize();
-    this.o.resize();
+  this.setState = function(stateName) {
+    if(this.currentState)
+      this.currentState.destroy();
+    this.currentState = new this.states[stateName](this);
   };
 
   this.update = function(dt) {
-    this.bg.update(dt);
-    this.o.update(dt);
+    this.currentState.update(dt)
   }
 
   this.draw = function(dt) {
-    this.bg.draw()
-    this.o.draw(dt);
+    this.currentState.draw(dt);
   };
 
   this.loop = function() {
@@ -329,4 +363,5 @@ function Game() {
 
 var game = new Game();
 
+game.setState('gameplay');
 game.run();
