@@ -155,18 +155,19 @@ function Obstacle(game) {
   this.game = game;
   this.x = this.startX = this.game.halfWidth;
   this.y = this.startY = this.game.halfHeight;
-  this.speed = 100;
   this.width = 40;
   this.height = 50;
   this.moving = true;
   this.scale = 1;
+  this.lives = true;
 
   this.render = function(dt) {
-    this.scale += dt * 4;
+    if(this.scale < 25)
+      this.scale += dt * 5;
 
     this.game.ctx.translate(this.x, this.y);
     this.game.ctx.scale(this.scale, this.scale);
-    this.game.ctx.rotate(45 * Math.PI / 180);
+    this.game.ctx.rotate(this.rotate * Math.PI / 180);
 
     this.game.ctx.beginPath();
     this.game.ctx.moveTo(5, 0);
@@ -216,13 +217,10 @@ function Obstacle(game) {
 
   this.update = function(dt) {
     if(this.moving && this.distance) {
-      this.x += this.directionX * this.speed * dt;
-      this.y += this.directionY * this.speed * dt;
+      this.x += this.directionX * this.speed * dt * 2;
+      this.y += this.directionY * this.speed * dt * 2;
       if(Math.sqrt(Math.pow(this.x - this.startX,2) + Math.pow(this.x - this.startY,2)) >= this.distance) {
-        this.x = this.game.halfWidth;
-        this.y = this.game.halfHeight;
-        this.scale = 1;
-        // this.moving = false;
+        this.lives = false;
       }
     }
   };
@@ -230,8 +228,21 @@ function Obstacle(game) {
   this.resize = function() {
     this.x = this.startX = this.game.halfWidth;
     this.y = this.startY = this.game.halfHeight;
-    this.endX = this.game.canvas.width;
-    this.endY = this.game.canvas.height;
+    this.randomize();
+  };
+
+  this.randomize = function() {
+    this.rotate = random(0, 359);
+    this.speed = random(50, 100);
+    var side = random(0, 1000) > 499 ? -1 : 1;
+
+    if(random(0, 999) > 499) {
+      this.endX = this.game.canvas.width * side;
+      this.endY = random(0, this.game.canvas.height);
+    } else {
+      this.endX = random(0, this.game.canvas.width);
+      this.endY = this.game.canvas.height * side;
+    }
     this.distance = Math.sqrt(Math.pow(this.endX - this.startX, 2) + Math.pow(this.endY - this.startY, 2));
     this.directionX = (this.endX - this.startX) / this.distance;
     this.directionY = (this.endY- this.startY) / this.distance;
@@ -244,6 +255,8 @@ function Obstacle(game) {
       this.game.ctx.restore();
     }
   };
+
+  this.randomize();
 }
 
 // states
@@ -253,27 +266,49 @@ function Gameplay(game) {
   this.obstacles = [];
   this.entities = [];
 
+  console.log('gamplay');
+  
+  this.timer = setTimeout(function() { this.addObstacle() }.bind(this), 1000);
+
   this.bg = new Bg(this.game);
-  this.o = new Obstacle(this.game);
 
 
   this.update = function(dt) {
     this.bg.update(dt);
-    this.o.update(dt);
+    for(var o = 0; o < this.obstacles.length; o++) {
+      if(this.obstacles[o] && this.obstacles[o].lives) {
+        this.obstacles[o].update(dt);
+      } else {
+        delete this.obstacles[o];
+      }
+    }
   };
 
   this.draw = function(dt) {
     this.bg.draw()
-    this.o.draw(dt);
+    for(var o = 0; o < this.obstacles.length; o++) {
+      if(this.obstacles[o] && this.obstacles[o].lives) {
+        this.obstacles[o].draw(dt);
+      }
+    }
   };
 
   this.resize = function() {
     this.bg.resize();
-    this.o.resize();
+    for(var o = 0; o < this.obstacles.length; o++) {
+      this.obstacles[o].resize();
+    }
+  };
+
+  this.addObstacle = function() {
+    console.log('add');
+    this.obstacles.push(new Obstacle(this.game));
+    clearTimeout(this.timer);
+    this.timer = setTimeout(function() { this.addObstacle() }.bind(this), random(1000, 3000));
   };
 
   this.destroy = function() {
-
+    clearTimeout(this.timer);
   };
 }
 
