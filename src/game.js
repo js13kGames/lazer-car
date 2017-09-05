@@ -162,7 +162,7 @@ function Obstacle(game) {
   this.lives = true;
 
   this.render = function(dt) {
-    if(this.scale < 25)
+    if(this.scale < 35)
       this.scale += dt * 5;
 
     this.game.ctx.translate(this.x, this.y);
@@ -237,11 +237,11 @@ function Obstacle(game) {
     var side = random(0, 1000) > 499 ? -1 : 1;
 
     if(random(0, 999) > 499) {
-      this.endX = this.game.canvas.width * side;
+      this.endX = this.game.canvas.width * side * 2;
       this.endY = random(0, this.game.canvas.height);
     } else {
       this.endX = random(0, this.game.canvas.width);
-      this.endY = this.game.canvas.height * side;
+      this.endY = this.game.canvas.height * side * 2;
     }
     this.distance = Math.sqrt(Math.pow(this.endX - this.startX, 2) + Math.pow(this.endY - this.startY, 2));
     this.directionX = (this.endX - this.startX) / this.distance;
