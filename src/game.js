@@ -1,3 +1,5 @@
+"use strict";
+
 window.requestAnimFrame = (function(callback) {
   return window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame ||
   function(callback) {
@@ -368,9 +370,9 @@ function Game() {
   this.loop = function() {
     window.requestAnimFrame(this.loop);
     
-    currentTime = (new Date()).getTime();
+    var currentTime = (new Date()).getTime();
 
-    dt = (currentTime - this.lastTime) / 1000;
+    var dt = (currentTime - this.lastTime) / 1000;
 
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
