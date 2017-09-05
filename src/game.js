@@ -296,12 +296,13 @@ function Gameplay(game) {
   this.resize = function() {
     this.bg.resize();
     for(var o = 0; o < this.obstacles.length; o++) {
-      this.obstacles[o].resize();
+      if(this.obstacles[o] && this.obstacles[o].lives) {
+        this.obstacles[o].resize();
+      }
     }
   };
 
   this.addObstacle = function() {
-    console.log('add');
     this.obstacles.push(new Obstacle(this.game));
     clearTimeout(this.timer);
     this.timer = setTimeout(function() { this.addObstacle() }.bind(this), random(1000, 3000));
