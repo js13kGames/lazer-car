@@ -12,6 +12,12 @@ function random(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
+function drawLine(ctx, points) {
+  for(var p = 0; p < points.length; p++) {
+    ctx.lineTo(points[p][0], points[p][1]);
+  }
+}
+
 // background
 function Bg(game) {
   this.game = game;
@@ -161,6 +167,8 @@ function Bg(game) {
   return this;
 }
 
+// entities
+
 function Obstacle(game) {
   this.game = game;
   this.x = this.startX = this.game.halfWidth;
@@ -269,6 +277,172 @@ function Obstacle(game) {
   this.randomize();
 }
 
+function Player(game) {
+  this.game = game;
+  this.c = game.ctx;
+  this.x = this.game.halfWidth;
+  this.y = this.game.halfHeight;
+  this.scale = 10;
+  this.rotate = 0;
+
+  this.update = function(dt) {
+
+  };
+
+  this.draw = function(dt) {
+    this.c.save();
+    this.c.translate(this.x - (10 * this.scale), this.y + (20 * this.scale));
+    this.c.scale(this.scale, this.scale);
+
+    // outline
+    this.c.beginPath();
+    this.c.moveTo(5, 3);
+    drawLine(this.c, [
+      [8, 3],
+      [8, 4],
+      [4, 4],
+      [5, 3]
+    ]);
+    this.c.moveTo(12, 3);
+    drawLine(this.c, [
+      [15, 3],
+      [16, 4],
+      [12, 4],
+      [12, 3]
+    ]);
+    this.c.moveTo(4,10);
+    drawLine(this.c, [
+      [16, 10],
+      [15, 11],
+      [5, 11],
+      [4, 10]
+    ]);
+    this.c.rect(0, 6, 1, 2);
+    this.c.rect(5, 6, 10, 2);
+    this.c.rect(19, 6, 1, 2);
+    this.c.rect(1, 11, 3, 1);
+    this.c.rect(16, 11, 3, 1);
+    this.c.lineWidth = 2/this.scale;
+    this.c.strokeStyle = '#000';
+    this.c.stroke();
+    this.c.fillStyle = 'rgba(0, 0, 0, .7)';
+    this.c.fill();
+    this.c.closePath();
+
+    this.c.beginPath();
+    this.c.fillStyle = 'rgba(255, 255, 255, .7)';
+    this.c.rect(4, 6, 1, 1);
+    this.c.rect(15, 6, 1, 1);
+    this.c.fill();
+    this.c.closePath();
+
+    this.c.beginPath();
+    this.c.fillStyle = 'rgba(255, 0, 0, .5)';
+    this.c.moveTo(1, 6);
+    drawLine(this.c, [
+      [4, 6],
+      [4, 7],
+      [5, 7],
+      [5, 8],
+      [1, 8],
+      [1, 6]
+    ]);
+    this.c.moveTo(16, 6);
+    drawLine(this.c, [
+      [19, 6],
+      [19, 8],
+      [15, 8],
+      [15, 7],
+      [16, 7],
+      [16, 6]
+    ]);
+    this.c.fill();
+    this.c.closePath();
+
+    // b26afc
+
+    this.c.beginPath();
+    this.c.fillStyle = 'rgba(78, 96, 170, .7)';
+    this.c.moveTo(5, 0);
+    drawLine(this.c, [
+      [15, 0],
+      [17, 3],
+      [19, 4],
+      [20, 5],
+      [20, 6],
+      [0, 6],
+      [0, 5],
+      [1, 4],
+      [3, 3],
+      [5, 0],
+      [5, 1],
+      [5, 3],
+      [4, 4],
+      [8, 4],
+      [8, 3],
+      [12, 3],
+      [12, 4],
+      [16, 4],
+      [15, 3],
+      [15, 1],
+      [5, 1],
+      [5, 0]
+    ]);
+    this.c.moveTo(0, 8);
+    drawLine(this.c, [
+      [20, 8],
+      [20, 9],
+      [19, 11],
+      [15, 11],
+      [16, 10],
+      [4, 10],
+      [5, 11],
+      [1, 11],
+      [0, 9],
+      [0, 8]
+    ]);
+    this.c.fill();
+    this.c.closePath();
+
+    this.c.beginPath();
+    this.c.moveTo(5, 0);
+    drawLine(this.c, [
+      [15, 0],
+      [17, 3],
+      [19, 4],
+      [20, 5],
+      [20, 9],
+      [19, 11],
+      [1, 11],
+      [0, 9],
+      [0, 5],
+      [1, 4],
+      [3, 3],
+      [5, 0]
+    ]);
+    this.c.moveTo(0, 5);
+    this.c.lineTo(20, 5);
+    this.c.moveTo(0, 9);
+    this.c.lineTo(20, 9);
+    this.c.rect(5, 1, 10, 2);
+    this.c.rect(8, 3, 4, 1);
+    this.c.rect(1, 6, 4, 2);
+    this.c.rect(4, 6, 1, 1);
+    this.c.rect(15, 6, 4, 2);
+    this.c.rect(15, 6, 1, 1);
+    this.c.lineWidth = 2/14;
+    this.c.strokeStyle = '#4e60aa';
+    this.c.stroke();
+    this.c.closePath();
+    this.c.restore();
+  };
+
+  this.resize = function() {
+    this.x = this.game.halfWidth;
+    this.y = this.game.halfHeight;
+  };
+}
+
 // states
 
 function Gameplay(game) {
@@ -282,9 +456,11 @@ function Gameplay(game) {
 
   this.bg = new Bg(this.game);
 
+  this.player = new Player(this.game);
 
   this.update = function(dt) {
     this.bg.update(dt);
+    this.player.update(dt);
     for(var o = 0; o < this.obstacles.length; o++) {
       if(this.obstacles[o] && this.obstacles[o].lives) {
         this.obstacles[o].update(dt);
@@ -301,10 +477,12 @@ function Gameplay(game) {
         this.obstacles[o].draw(dt);
       }
     }
+    this.player.draw(dt);
   };
 
   this.resize = function() {
     this.bg.resize();
+    this.player.resize();
     for(var o = 0; o < this.obstacles.length; o++) {
       if(this.obstacles[o] && this.obstacles[o].lives) {
         this.obstacles[o].resize();
