@@ -171,6 +171,7 @@ function Bg(game) {
 
 function Obstacle(game) {
   this.game = game;
+  this.c = game.ctx;
   this.x = this.startX = this.game.halfWidth;
   this.y = this.startY = this.game.halfHeight;
   this.width = 40;
@@ -178,60 +179,6 @@ function Obstacle(game) {
   this.moving = true;
   this.scale = 1;
   this.lives = true;
-
-  this.render = function(dt) {
-    if(this.scale < 35)
-      this.scale += dt * 5;
-
-    this.game.ctx.translate(this.x, this.y);
-    this.game.ctx.scale(this.scale, this.scale);
-    this.game.ctx.rotate(this.rotate * Math.PI / 180);
-
-    this.game.ctx.beginPath();
-    this.game.ctx.moveTo(5, 0);
-    this.game.ctx.lineTo(8, 3);
-    this.game.ctx.lineTo(8, 12);
-    this.game.ctx.lineTo(5, 14);
-    this.game.ctx.lineTo(2, 13);
-    this.game.ctx.lineTo(0, 11);
-    this.game.ctx.lineTo(1, 5);
-    this.game.ctx.lineTo(3, 2);
-    this.game.ctx.lineTo(5, 0);
-    this.game.ctx.fillStyle = 'rgba(240, 97, 163, .5)';
-    this.game.ctx.fill();
-
-    this.gradient = this.game.ctx.createLinearGradient(10, 0, 0, 10);
-    this.gradient.addColorStop(0, '#4e60aa');
-    this.gradient.addColorStop(.5, '#f061a3');
-    this.gradient.addColorStop(1, '#f97862');
-    
-
-    this.game.ctx.beginPath();
-    this.game.ctx.moveTo(5, 0);
-    this.game.ctx.lineTo(8, 3);
-    this.game.ctx.lineTo(8, 12);
-    this.game.ctx.lineTo(5, 14);
-    this.game.ctx.lineTo(2, 13);
-    this.game.ctx.lineTo(0, 11);
-    this.game.ctx.lineTo(1, 5);
-    this.game.ctx.lineTo(3, 2);
-    this.game.ctx.lineTo(5, 0);
-    this.game.ctx.lineTo(5, 14);
-    this.game.ctx.moveTo(3, 2);
-    this.game.ctx.lineTo(5, 4);
-    this.game.ctx.lineTo(8, 3);
-    this.game.ctx.moveTo(3, 2);
-    this.game.ctx.lineTo(3, 6);
-    this.game.ctx.lineTo(5, 14);
-    this.game.ctx.moveTo(1, 5);
-    this.game.ctx.lineTo(3, 6);
-    this.game.ctx.lineTo(2, 13);
-    this.game.ctx.moveTo(5, 4);
-    this.game.ctx.lineTo(8, 12);
-    this.game.ctx.lineWidth = 2/this.scale;
-    this.game.ctx.strokeStyle = this.gradient;
-    this.game.ctx.stroke();
-  };
 
   this.update = function(dt) {
     if(this.moving && this.distance) {
@@ -268,9 +215,69 @@ function Obstacle(game) {
 
   this.draw = function(dt) {
     if(this.moving) {
-      this.game.ctx.save();
-      this.render(dt);
-      this.game.ctx.restore();
+      if(this.scale < 35)
+        this.scale += dt * 5;
+
+      this.c.save();
+      this.c.translate(this.x, this.y);
+      this.c.scale(this.scale, this.scale);
+      this.c.rotate(this.rotate * Math.PI / 180);
+  
+      this.c.beginPath();
+      this.c.moveTo(5, 0);
+      drawLine(this.c, [
+        [8, 3],
+        [8, 12],
+        [5, 14],
+        [2, 13],
+        [0, 11],
+        [1, 5],
+        [3, 2],
+        [5, 0]
+      ]);
+      this.c.fillStyle = 'rgba(240, 97, 163, .5)';
+      this.c.fill();
+  
+      this.gradient = this.c.createLinearGradient(10, 0, 0, 10);
+      this.gradient.addColorStop(0, '#4e60aa');
+      this.gradient.addColorStop(.5, '#f061a3');
+      this.gradient.addColorStop(1, '#f97862');
+      
+  
+      this.c.beginPath();
+      this.c.moveTo(5, 0);
+      drawLine(this.c, [
+        [8, 3],
+        [8, 12],
+        [5, 14],
+        [2, 13],
+        [0, 11],
+        [1, 5],
+        [3, 2],
+        [5, 0],
+        [5, 14]
+      ]);
+      this.c.moveTo(3, 2);
+      drawLine(this.c, [
+        [5, 4],
+        [8, 3]
+      ]);
+      this.c.moveTo(3, 2);
+      drawLine(this.c, [
+        [3, 6],
+        [5, 14]
+      ]);
+      this.c.moveTo(1, 5);
+      drawLine(this.c, [
+        [3, 6],
+        [2, 13]
+      ]);
+      this.c.moveTo(5, 4);
+      this.c.lineTo(8, 12);
+      this.c.lineWidth = 2/this.scale;
+      this.c.strokeStyle = this.gradient;
+      this.c.stroke();
+      this.c.restore();
     }
   };
 
