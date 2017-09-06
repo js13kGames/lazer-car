@@ -456,6 +456,8 @@ function Gameplay(game) {
   this.game = game;
   this.obstacles = [];
   this.entities = [];
+  this.backgroundObstacles = [];
+  this.foregroundObstacles = [];
 
   console.log('gamplay');
   
@@ -467,38 +469,63 @@ function Gameplay(game) {
 
   this.update = function(dt) {
     this.bg.update(dt);
+    for(var o = 0; o < this.backgroundObstacles.length; o++) {
+      if(this.backgroundObstacles[o] && this.backgroundObstacles[o].lives) {
+        this.backgroundObstacles[o].update(dt);
+        if(this.backgroundObstacles[o].scale > this.player.scale) {
+          this.foregroundObstacles.push(this.backgroundObstacles[o]);
+          delete this.backgroundObstacles[o];
+        }
+      }
+    }
+    
     this.player.update(dt);
-    for(var o = 0; o < this.obstacles.length; o++) {
-      if(this.obstacles[o] && this.obstacles[o].lives) {
-        this.obstacles[o].update(dt);
+
+    for(var o = 0; o < this.foregroundObstacles.length; o++) {
+      if(this.foregroundObstacles[o] && this.foregroundObstacles[o].lives) {
+        this.foregroundObstacles[o].update(dt);
       } else {
-        delete this.obstacles[o];
+        delete this.foregroundObstacles[o];
       }
     }
   };
 
   this.draw = function(dt) {
     this.bg.draw()
-    for(var o = 0; o < this.obstacles.length; o++) {
-      if(this.obstacles[o] && this.obstacles[o].lives) {
-        this.obstacles[o].draw(dt);
+    for(var o = 0; o < this.backgroundObstacles.length; o++) {
+      if(this.backgroundObstacles[o] && this.backgroundObstacles[o].lives) {
+        this.backgroundObstacles[o].draw(dt);
       }
     }
+
     this.player.draw(dt);
+
+    for(var o = 0; o < this.foregroundObstacles.length; o++) {
+      if(this.foregroundObstacles[o] && this.foregroundObstacles[o].lives) {
+        this.foregroundObstacles[o].draw(dt);
+      }
+    }
   };
 
   this.resize = function() {
     this.bg.resize();
+    for(var o = 0; o < this.backgroundObstacles.length; o++) {
+      if(this.backgroundObstacles[o] && this.backgroundObstacles[o].lives) {
+        this.backgroundObstacles[o].resize();
+      }
+    }
+
     this.player.resize();
-    for(var o = 0; o < this.obstacles.length; o++) {
-      if(this.obstacles[o] && this.obstacles[o].lives) {
-        this.obstacles[o].resize();
+
+    for(var o = 0; o < this.foregroundObstacles.length; o++) {
+      if(this.foregroundObstacles[o] && this.foregroundObstacles[o].lives) {
+        this.foregroundObstacles[o].resize();
       }
     }
   };
 
   this.addObstacle = function() {
-    this.obstacles.push(new Obstacle(this.game));
+    this.backgroundObstacles.push(new Obstacle(this.game));
     clearTimeout(this.timer);
     this.timer = setTimeout(function() { this.addObstacle() }.bind(this), random(1000, 3000));
   };
