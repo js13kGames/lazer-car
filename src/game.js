@@ -197,7 +197,7 @@ function Obstacle(game) {
   };
 
   this.randomize = function() {
-    this.rotate = random(0, 359);
+    this.rotate = random(0, 4);
     this.speed = random(50, 100);
     var side = random(0, 1000) > 499 ? -1 : 1;
 
@@ -219,9 +219,11 @@ function Obstacle(game) {
         this.scale += dt * 5;
 
       this.c.save();
-      this.c.translate(this.x, this.y);
+      var x = (this.rotate === 0 || this.rotate === 2) ? this.x - 6 : this.x - 3;
+      var y = (this.rotate === 0 || this.rotate === 2) ? this.y - 3 : this.y - 6;
+      this.c.translate(x, this.y);
       this.c.scale(this.scale, this.scale);
-      this.c.rotate(this.rotate * Math.PI / 180);
+      this.c.rotate(this.rotate * 90 * Math.PI / 180);
   
       this.c.beginPath();
       this.c.moveTo(5, 0);
