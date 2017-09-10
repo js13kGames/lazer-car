@@ -1,13 +1,13 @@
 # Lazer Car - #js13 game
 
-run server
+### run server
 
 ```> npm run start```
 
-build game
+### build game
 
 ```> npm run build```
 
-package to zip
+### package to zip
 
 ```> npm run deploy```
