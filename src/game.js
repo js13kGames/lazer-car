@@ -18,6 +18,12 @@ function drawLine(ctx, points) {
   }
 }
 
+function colorStop(gradient, stops) {
+  for(var s = 0; s < stops.length; s++) {
+    gradient.addColorStop(stops[s][0], stops[s][1]);
+  }
+}
+
 // background
 function Bg(game) {
   this.game = game;
@@ -65,13 +71,15 @@ function Bg(game) {
 
   this.drawGradient = function() {
     this.gradient = this.ctx.createLinearGradient(0, 0, 0, this.canvas.height);
-    this.gradient.addColorStop(0, '#441541');
-    this.gradient.addColorStop(.48, '#441541');
-    this.gradient.addColorStop(.499, '#f742a3');
-    this.gradient.addColorStop(.5, '#fa71b9');
-    this.gradient.addColorStop(.501, '#f742a3');
-    this.gradient.addColorStop(.52, '#271126');
-    this.gradient.addColorStop(1, '#271126');
+    colorStop(this.gradient, [
+      [0, '#441541'],
+      [.48, '#441541'],
+      [.499, '#f742a3'],
+      [.5, '#fa71b9'],
+      [.501, '#f742a3'],
+      [.52, '#271126'],
+      [1, '#271126']
+    ]);
     
     this.ctx.save();
     this.ctx.fillStyle = this.gradient;
@@ -93,12 +101,14 @@ function Bg(game) {
   this.drawRadials = function() {
 
     var radialGradient = this.ctx.createRadialGradient(this.game.halfWidth, this.game.halfHeight, 1, this.game.halfWidth, this.game.halfHeight, this.maxSize / 2);
-    radialGradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
-    radialGradient.addColorStop(.01, 'rgba(255, 255, 255, .7)');
-    radialGradient.addColorStop(.07, 'rgba(247, 66, 163, .5)');
-    radialGradient.addColorStop(.2, 'rgba(247, 66, 163, .3)');
-    radialGradient.addColorStop(.5, 'rgba(247, 66, 163, .1)');
-    radialGradient.addColorStop(1, 'rgba(247, 66, 163, .0)');
+    colorStop(radialGradient, [
+      [0, 'rgba(255, 255, 255, 1)'],
+      [.01, 'rgba(255, 255, 255, .7)'],
+      [.07, 'rgba(247, 66, 163, .5)'],
+      [.2, 'rgba(247, 66, 163, .3)'],
+      [.5, 'rgba(247, 66, 163, .1)'],
+      [1, 'rgba(247, 66, 163, .0)']
+    ]);
 
     this.ctx.save();
     this.ctx.arc(this.game.halfWidth, this.game.halfHeight, this.maxSize / 2, 0, 2*Math.PI);
@@ -129,9 +139,11 @@ function Bg(game) {
     this.ctx.restore();
 
     var lineGradient = this.ctx.createRadialGradient(this.game.halfWidth, this.game.halfHeight, 1, this.game.halfWidth, this.game.halfHeight, this.maxSize);
-    lineGradient.addColorStop(0, 'rgba(50, 106, 222, 0)');
-    lineGradient.addColorStop(.2, 'rgba(195, 135, 255, 1)');
-    lineGradient.addColorStop(1, '#c387ff');
+    colorStop(lineGradient, [
+      [0, 'rgba(50, 106, 222, 0)'],
+      [.2, 'rgba(195, 135, 255, 1)'],
+      [1, '#c387ff']
+    ]);
 
     for(var l = 0; l < 12 + 1; l++) {
       this.ctx.save();
@@ -241,9 +253,11 @@ function Obstacle(game) {
       this.c.fill();
   
       this.gradient = this.c.createLinearGradient(10, 0, 0, 10);
-      this.gradient.addColorStop(0, '#4e60aa');
-      this.gradient.addColorStop(.5, '#f061a3');
-      this.gradient.addColorStop(1, '#f97862');
+      colorStop(this.gradient, [
+        [0, '#4e60aa'],
+        [.5, '#f061a3'],
+        [1, '#f97862']
+      ]);
       
   
       this.c.beginPath();
