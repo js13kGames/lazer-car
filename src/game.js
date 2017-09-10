@@ -117,12 +117,12 @@ function Bg(game) {
       this.ctx.beginPath()
       this.ctx.arc(x, y, this.circles[c], 0, 2 * Math.PI);
       this.ctx.lineWidth = 2;
-      this.ctx.strokeStyle = 'rgba(195, 135, 255, ' + currentCircle / Object.keys(this.circles).length +')';
+      this.ctx.strokeStyle = 'rgba(195, 135, 255, ' + currentCircle / this.circles.length +')';
       this.ctx.stroke();
       this.ctx.beginPath();
       this.ctx.arc(x, y, this.circles[c], 0, 2 * Math.PI);
       this.ctx.lineWidth = 4;
-      this.ctx.strokeStyle = 'rgba(78, 176, 237, ' + (currentCircle / Object.keys(this.circles).length) / 5 + ')';
+      this.ctx.strokeStyle = 'rgba(78, 176, 237, ' + (currentCircle / this.circles.length) / 5 + ')';
       this.ctx.stroke();
       currentCircle++;
     }
