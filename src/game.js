@@ -456,8 +456,6 @@ function Player(game) {
 
 function Gameplay(game) {
   this.game = game;
-  this.obstacles = [];
-  this.entities = [];
   this.backgroundObstacles = [];
   this.foregroundObstacles = [];
 
@@ -511,19 +509,10 @@ function Gameplay(game) {
 
   this.resize = function() {
     this.bg.resize();
-    for(var o = 0; o < this.backgroundObstacles.length; o++) {
-      if(this.backgroundObstacles[o] && this.backgroundObstacles[o].lives) {
-        this.backgroundObstacles[o].resize();
-      }
-    }
+    this.backgroundObstacles = [];
+    this.foregroundObstacles = [];
 
     this.player.resize();
-
-    for(var o = 0; o < this.foregroundObstacles.length; o++) {
-      if(this.foregroundObstacles[o] && this.foregroundObstacles[o].lives) {
-        this.foregroundObstacles[o].resize();
-      }
-    }
   };
 
   this.addObstacle = function() {
