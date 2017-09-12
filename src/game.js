@@ -516,13 +516,13 @@ function Gameplay(game) {
   this.player = new Player(this.game);
 
   this.keyUp = function(e) {
-    if(e.keyCode === 32) {
+    if(e.keyCode === 32 || e.type === 'touchend') {
       this.spacePressed = false;
     }
   };
 
   this.keyDown = function(e) {
-    if(e.keyCode === 32 && !this.spacePressed && this.player.isMoving) {
+    if((e.keyCode === 32|| e.type === 'touchstart') && !this.spacePressed && this.player.isMoving) {
       this.spacePressed = true;
       this.player.changeDir();
     }
@@ -637,15 +637,19 @@ function Gameplay(game) {
   };
 
   this.bindKeys = function() {
-    document.addEventListener("keyup", this.keyUp);
-    document.addEventListener("keydown", this.keyDown);
+    document.addEventListener('keyup', this.keyUp);
+    document.addEventListener('keydown', this.keyDown);
+    document.addEventListener('touchstart', this.keyDown);
+    document.addEventListener('touchend', this.keyUp);
   };
 
   this.destroy = function() {
     clearTimeout(this.timer);
     clearInterval(this.pointsTimer);
-    document.removeEventListener("keyup", this.keyUp);
-    document.removeEventListener("keydown", this.keyDown);
+    document.removeEventListener('keyup', this.keyUp);
+    document.removeEventListener('keydown', this.keyDown);
+    document.removeEventListener('touchend', this.keyUp);
+    document.removeEventListener('touchstart', this.keyDown);
   };
 
   this.keyUp = this.keyUp.bind(this);
