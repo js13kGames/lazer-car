@@ -627,12 +627,12 @@ function Gameplay(game) {
     this.game.ctx.fillStyle = 'rgba(240, 97, 163, .9)';
     this.game.ctx.fillRect(
       (this.game.width / 2) - (len / 2) - 4,
-      this.game.height - 68,
+      (this.game.height / 2) - 18,
       len+8,
       36
     );
     this.game.ctx.fillStyle = '#fff';
-    this.game.ctx.fillText(txt.toUpperCase(), (this.game.width / 2) - (len / 2), this.game.height - 40);
+    this.game.ctx.fillText(txt.toUpperCase(), (this.game.width / 2) - (len / 2), (this.game.height / 2) + 10);
     this.game.ctx.restore();
   };
 
