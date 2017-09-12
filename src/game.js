@@ -305,19 +305,47 @@ function Player(game) {
   this.c = game.ctx;
   this.x = this.game.halfWidth;
   this.y = this.game.halfHeight;
-  this.scale = 10;
+  this.scale = 1;
   this.rotate = 0;
+  this.canvas = document.createElement('canvas');
+  this.c = this.canvas.getContext('2d');
+  this.isMoving = false;
+  this.moveLeft = true;
+  this.speed = 50;
 
   this.update = function(dt) {
+    if(this.rotate > 360)
+      this.rotate = 0;
 
+    if(this.rotate < 0)
+      this.rotate = 360;
+
+    if(this.isMoving)
+      this.rotate += this.moveLeft ? (dt * this.speed) : -(dt * this.speed);
+  };
+
+  this.changeDir = function() {
+    this.moveLeft = !this.moveLeft;
+    this.speed += 1;
   };
 
   this.draw = function(dt) {
+    this.game.ctx.save();
+    this.game.ctx.translate( this.game.canvas.width / 2, this.game.canvas.height / 2);
+    this.game.ctx.rotate( this.rotate * Math.PI / 180);
+    this.game.ctx.translate( -(this.game.canvas.width / 2), -(this.game.canvas.height / 2) );
+    this.game.ctx.drawImage( this.canvas, this.game.halfWidth - (this.canvas.width / 2), this.game.halfHeight - (this.canvas.height / 2) );
+    this.game.ctx.restore();
+  };
+
+  this.render = function() {
+    this.canvas.width = this.canvas.height = Math.min(this.game.canvas.width, this.game.canvas.height);
+    this.scale = parseInt(this.canvas.width / 80, 10);
+
     this.c.save();
-    this.c.translate(this.x - (10 * this.scale), this.y + (20 * this.scale));
+    this.c.translate((this.canvas.width / 2) - ((this.scale * 20) / 2), this.canvas.height - (this.scale * 12) - 20);
     this.c.scale(this.scale, this.scale);
 
-    // outline
     this.c.beginPath();
     this.c.moveTo(5, 3);
     drawLine(this.c, [
@@ -381,8 +409,6 @@ function Player(game) {
     ]);
     this.c.fill();
     this.c.closePath();
-
-    // b26afc
 
     this.c.beginPath();
     this.c.fillStyle = 'rgba(78, 96, 170, .7)';
@@ -463,6 +489,7 @@ function Player(game) {
   this.resize = function() {
     this.x = this.game.halfWidth;
     this.y = this.game.halfHeight;
+    this.render();
   };
 }
 
@@ -472,6 +499,7 @@ function Gameplay(game) {
   this.game = game;
   this.backgroundObstacles = [];
   this.foregroundObstacles = [];
+  this.spacePressed = false;
 
   console.log('gamplay');
   
@@ -480,6 +508,22 @@ function Gameplay(game) {
   this.bg = new Bg(this.game);
 
   this.player = new Player(this.game);
+
+  this.keyUp = function(e) {
+    if(e.keyCode === 32) {
+      this.spacePressed = false;
+    }
+  };
+
+  this.keyDown = function(e) {
+    if(e.keyCode === 32 && !this.spacePressed && this.player.isMoving) {
+      this.spacePressed = true;
+      this.player.changeDir();
+    }
+
+    if(!this.player.isMoving)
+      this.player.isMoving = true;
+  };
 
   this.update = function(dt) {
     this.bg.update(dt);
@@ -535,9 +579,20 @@ function Gameplay(game) {
     this.timer = setTimeout(function() { this.addObstacle() }.bind(this), random(1000, 3000));
   };
 
+  this.bindKeys = function() {
+    document.addEventListener("keyup", this.keyUp);
+    document.addEventListener("keydown", this.keyDown);
+  };
+
   this.destroy = function() {
     clearTimeout(this.timer);
+    document.removeEventListener("keyup", this.keyUp);
+    document.removeEventListener("keydown", this.keyDown);
   };
+
+  this.keyUp = this.keyUp.bind(this);
+  this.keyDown = this.keyDown.bind(this);
+  this.bindKeys();
 }
 
 // game object
