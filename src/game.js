@@ -192,19 +192,22 @@ function Obstacle(game) {
   this.c = game.ctx;
   this.x = this.startX = this.game.halfWidth;
   this.y = this.startY = this.game.halfHeight;
-  this.width = 40;
-  this.height = 50;
   this.moving = true;
   this.scale = 1;
   this.lives = true;
+  this.speed = 100;
 
   this.update = function(dt) {
     if(this.moving && this.distance) {
+      if(this.scale < 35)
+        this.scale += dt * 4;
       this.x += this.directionX * this.speed * dt * 2;
       this.y += this.directionY * this.speed * dt * 2;
       if(Math.sqrt(Math.pow(this.x - this.startX,2) + Math.pow(this.x - this.startY,2)) >= this.distance) {
         this.lives = false;
       }
+      if(this.lives)
+        this.currentDistance = Math.sqrt(Math.pow(this.x - this.game.halfWidth, 2) + Math.pow(this.y - this.game.halfHeight, 2));
     }
   };
 
@@ -216,7 +219,6 @@ function Obstacle(game) {
 
   this.randomize = function() {
     this.rotate = random(0, 4);
-    this.speed = random(50, 100);
     var side = random(0, 1000) > 499 ? -1 : 1;
 
     if(random(0, 999) > 499) {
@@ -233,13 +235,10 @@ function Obstacle(game) {
 
   this.draw = function(dt) {
     if(this.moving) {
-      if(this.scale < 35)
-        this.scale += dt * 5;
-
       this.c.save();
-      var x = (this.rotate === 0 || this.rotate === 2) ? this.x - 6 : this.x - 3;
-      var y = (this.rotate === 0 || this.rotate === 2) ? this.y - 3 : this.y - 6;
-      this.c.translate(x, this.y);
+      var x = (this.rotate === 0 || this.rotate === 2) ? this.x + 12 : this.x + 6;
+      var y = (this.rotate === 0 || this.rotate === 2) ? this.y + 6 : this.y + 12;
+      this.c.translate(x, y);
       this.c.scale(this.scale, this.scale);
       this.c.rotate(this.rotate * 90 * Math.PI / 180);
   
@@ -312,7 +311,7 @@ function Player(game) {
   this.x = this.game.halfWidth;
   this.y = this.game.halfHeight;
   this.scale = 1;
-  this.rotate = 0;
+  this.rotate = 90;
   this.canvas = document.createElement('canvas');
   this.c = this.canvas.getContext('2d');
   this.isMoving = false;
@@ -332,7 +331,7 @@ function Player(game) {
 
   this.changeDir = function() {
     this.moveLeft = !this.moveLeft;
-    this.speed += 1;
+    this.speed += 5;
   };
 
   this.draw = function(dt) {
@@ -347,6 +346,7 @@ function Player(game) {
   this.render = function() {
     this.canvas.width = this.canvas.height = Math.min(this.game.canvas.width, this.game.canvas.height);
     this.scale = parseInt(this.canvas.width / 80, 10);
+    this.distance = (this.canvas.height - (this.scale * 20)) / 2;
 
     this.c.save();
     this.c.translate((this.canvas.width / 2) - ((this.scale * 20) / 2), this.canvas.height - (this.scale * 12) - 20);
@@ -490,6 +490,21 @@ function Player(game) {
     this.c.stroke();
     this.c.closePath();
     this.c.restore();
+
+    var temp = new Image();
+
+    temp.src = this.canvas.toDataURL();
+
+    this.c.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+    temp.onload = function() {
+      this.c.save();
+      this.c.translate(this.canvas.width / 2, this.canvas.height / 2);
+      this.c.rotate(-90 * Math.PI / 180);
+      this.c.translate(-(this.canvas.width / 2), -(this.canvas.height / 2));
+      this.c.drawImage(temp, 0, 0);
+      this.c.restore();
+    }.bind(this);
   };
 
   this.resize = function() {
@@ -503,17 +518,23 @@ function Player(game) {
 
 function Gameplay(game) {
   this.game = game;
-  this.backgroundObstacles = [];
-  this.foregroundObstacles = [];
-  this.spacePressed = false;
-  this.points = 0;
-  this.gameover = false;
+  this.bg = new Bg(this.game);
+  this.player = new Player(this.game);
 
   console.log('gamplay');
-
-  this.bg = new Bg(this.game);
-
-  this.player = new Player(this.game);
+  this.init = function() {
+    this.backgroundObstacles = [];
+    this.foregroundObstacles = [];
+    this.spacePressed = false;
+    this.points = 0;
+    this.best = 0;
+    this.gameover = false;
+    this.player.isMoving = false;
+    this.player.rotate = 90;
+    this.timer = undefined;
+    this.pointsTimer = undefined;
+    this.player.speed = 50;
+  };
 
   this.keyUp = function(e) {
     if(e.keyCode === 32 || e.type === 'touchend') {
@@ -522,11 +543,6 @@ function Gameplay(game) {
   };
 
   this.keyDown = function(e) {
-    if((e.keyCode === 32|| e.type === 'touchstart') && !this.spacePressed && this.player.isMoving) {
-      this.spacePressed = true;
-      this.player.changeDir();
-    }
-
     if(!this.player.isMoving) {
       this.player.isMoving = true;
       if(!this.timer)
@@ -534,29 +550,109 @@ function Gameplay(game) {
       if(!this.pointsTimer)
         this.pointsTimer = setInterval(function() { this.points++; }.bind(this), 100);
     }
+
+    if((e.keyCode === 32|| e.type === 'touchstart') && !this.spacePressed && this.player.isMoving) {
+      if(!this.gameover) {
+        this.spacePressed = true;
+        this.player.changeDir();
+      } else {
+        this.init();
+      }
+    }
   };
 
   this.update = function(dt) {
-    this.bg.update(dt);
-    for(var o = 0; o < this.backgroundObstacles.length; o++) {
-      if(this.backgroundObstacles[o] && this.backgroundObstacles[o].lives) {
-        this.backgroundObstacles[o].update(dt);
-        if(this.backgroundObstacles[o].scale > this.player.scale) {
-          this.foregroundObstacles.push(this.backgroundObstacles[o]);
-          delete this.backgroundObstacles[o];
+    if(!this.gameover) {
+      this.bg.update(dt);
+      for(var o = 0; o < this.backgroundObstacles.length; o++) {
+        if(this.backgroundObstacles[o] && this.backgroundObstacles[o].lives) {
+          this.backgroundObstacles[o].update(dt);
+          if(this.backgroundObstacles[o].currentDistance >= this.player.distance) {
+            if(this.collide(this.backgroundObstacles[o])) {
+              this.setGameover();
+            } else {
+              this.foregroundObstacles.push(this.backgroundObstacles[o]);
+              delete this.backgroundObstacles[o];
+            }
+          }
+        }
+      }
+      
+      this.player.update(dt);
+  
+      for(var o = 0; o < this.foregroundObstacles.length; o++) {
+        if(this.foregroundObstacles[o] && this.foregroundObstacles[o].lives) {
+          this.foregroundObstacles[o].update(dt);
+        } else {
+          delete this.foregroundObstacles[o];
         }
       }
     }
-    
-    this.player.update(dt);
+  };
 
-    for(var o = 0; o < this.foregroundObstacles.length; o++) {
-      if(this.foregroundObstacles[o] && this.foregroundObstacles[o].lives) {
-        this.foregroundObstacles[o].update(dt);
+  this.collide = function(obstacle) {
+    var angle = (Math.atan2(obstacle.y - this.game.halfHeight, obstacle.x - this.game.halfWidth) * 180 / Math.PI)
+    if(angle < 0)
+      angle += 360;
+      
+    if(this.player.rotate - 20 < angle && this.player.rotate + 20 > angle) {
+      return true;
+    }
+    
+    return false;
+  };
+
+  this.setGameover = function() {
+    this.best = 0;
+    this.gameover = true;
+
+    if (typeof(Storage) !== "undefined") {
+      var best = parseInt(localStorage.getItem("bestScore"), 10) || 0;
+      if(this.points > best) {
+        this.best = this.points;
+        localStorage.setItem("bestScore", this.points.toString());
       } else {
-        delete this.foregroundObstacles[o];
+        this.best = best;
       }
     }
+
+    clearTimeout(this.timer);
+    clearInterval(this.pointsTimer);
+  };
+
+  this.drawGameover = function(dt) {
+    var gameoverTxt = 'GAME OVER';
+    var bestTxt = 'BEST: ' + this.best.toString();
+    var scoreTxt = 'SCORE: ' + this.points.toString();
+    this.game.ctx.save();
+    this.game.ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+    this.game.ctx.fillRect(0, 0, this.game.width, this.game.height);
+    this.game.ctx.fillStyle = '#f061a3';
+    this.game.ctx.font = "48px Arial";
+    var gotW = this.game.ctx.measureText(gameoverTxt).width;
+    this.game.ctx.fillText(gameoverTxt, this.game.halfWidth - (gotW / 2), this.game.halfHeight / 2);
+    this.game.ctx.fillStyle = '#fff';
+    this.game.ctx.font = "32px Arial";
+    var bW = this.game.ctx.measureText(bestTxt).width;
+    this.game.ctx.fillText(bestTxt, this.game.halfWidth - (bW / 2), this.game.halfHeight - 30);
+    var sW = this.game.ctx.measureText(scoreTxt).width;
+    this.game.ctx.fillText(scoreTxt, this.game.halfWidth - (sW / 2), this.game.halfHeight + 30);
+    var txt = isMobile() ? 'Tap' : 'Spacebar';
+    txt += ' To Restart';
+    this.game.ctx.save();
+    this.game.ctx.font = "28px Arial";
+    var len = this.game.ctx.measureText(txt.toUpperCase()).width;
+    this.game.ctx.fillStyle = 'rgba(240, 97, 163, .9)';
+    this.game.ctx.fillRect(
+      (this.game.width / 2) - (len / 2) - 4,
+      (this.game.height / 2) + 122,
+      len+8,
+      36
+    );
+    this.game.ctx.fillStyle = '#fff';
+    this.game.ctx.fillText(txt.toUpperCase(), (this.game.width / 2) - (len / 2), (this.game.height / 2) + 150);
+    this.game.ctx.restore();
+    this.game.ctx.restore();
   };
 
   this.draw = function(dt) {
@@ -579,6 +675,9 @@ function Gameplay(game) {
     this.drawSpeed();
     if(!this.player.isMoving)
       this.drawStart();
+
+    if(this.gameover)
+      this.drawGameover();
   };
 
   this.resize = function() {
@@ -654,6 +753,7 @@ function Gameplay(game) {
 
   this.keyUp = this.keyUp.bind(this);
   this.keyDown = this.keyDown.bind(this);
+  this.init();
   this.bindKeys();
 }
 
