@@ -757,6 +757,208 @@ function Gameplay(game) {
   this.bindKeys();
 }
 
+function MainMenu(game) {
+  this.game = game;
+  this.c = game.ctx;
+  this.bg = new Bg(this.game);
+
+  this.init = function() {
+
+  };
+
+  this.drawTitle = function() {
+    var gradient = this.c.createLinearGradient(0, 0, 0, 5);
+    colorStop(gradient, [
+      [0, '#251031'],
+      [.2, '#7244cb'],
+      [.4, '#b0b4fb'],
+      [.5, '#fcfcfc'],
+      [.51, '#040404'],
+      [.7, '#720b81'],
+      [1, '#c9c0db']
+    ]);
+
+    this.c.save();
+    this.c.translate(this.game.halfWidth - 176, this.game.halfHeight / 2);
+    this.c.scale(16, 16);
+    this.c.beginPath();
+    this.c.moveTo(0,0);
+    drawLine(this.c, [
+      [2,0],
+      [2,3],
+      [4,3],
+      [4,5],
+      [0,5],
+      [0,0]
+    ]);
+    this.c.moveTo(5, 5);
+    drawLine(this.c, [
+      [7,0],
+      [9,5],
+      [5,5]
+    ]);
+    this.c.moveTo(10, 0);
+    drawLine(this.c, [
+      [14,0],
+      [13,3],
+      [14,3],
+      [14,5],
+      [10,5],
+      [11,2],
+      [10,2],
+      [10,0]
+    ]);
+    this.c.moveTo(15, 0);
+    drawLine(this.c, [
+      [18,0],
+      [18,1.5],
+      [17,1.5],
+      [17,2],
+      [18,2],
+      [18,3.5],
+      [17,3.5],
+      [17,4],
+      [18,4],
+      [18,5],
+      [15,5],
+      [15,0]
+    ]);
+    this.c.moveTo(19, 0);
+    drawLine(this.c, [
+      [21,0]
+    ]);
+    this.c.bezierCurveTo(22.5, 0, 22.5, 3, 21, 3);
+    drawLine(this.c, [
+      [22,5],
+      [19,5],
+      [19,0]
+    ]);
+    this.c.fillStyle = gradient;
+    this.c.fill();
+    this.c.strokeStyle = '#000293';
+    this.c.lineWidth = .15;
+    this.c.stroke();
+    this.c.restore();
+  };
+
+  this.drawSubtitle = function() {
+    var gradient = this.c.createLinearGradient(0, 0, 0, 5);
+    colorStop(gradient, [
+      [0, '#fb6cfa'],
+      [1, '#f216f4']
+    ]);
+    this.c.save();
+    this.c.translate(this.game.halfWidth + 10, (this.game.halfHeight / 2) + 50);
+    this.c.scale(8, 8);
+    this.c.beginPath();
+    this.c.moveTo(0,1);
+    drawLine(this.c, [
+      [2,0],
+      [5,3],
+      [2,2],
+      [2,7],
+      [5,6],
+      [2,9],
+      [0,7],
+      [0,1]
+    ]);
+    this.c.moveTo(7,1);
+    drawLine(this.c, [
+      [9,0],
+      [10,0],
+      [21,1],
+      [10,1],
+      [8,2],
+      [8,7],
+      [10,7],
+      [11,6],
+      [11,4],
+      [12,5],
+      [12,6],
+      [13,6],
+      [10,9],
+      [9,8],
+      [8,9],
+      [6,7],
+      [7,1]
+    ]);
+    this.c.moveTo(14,1);
+    drawLine(this.c, [
+      [16,2],
+      [13,9],
+      [14,1]
+    ]);
+    this.c.moveTo(13,0);
+    drawLine(this.c, [
+      [20,0],
+      [21,1],
+      [22,1],
+      [15,5],
+      [19,9],
+      [13,5],
+      [20,1],
+      [13,2],
+      [13,0],
+    ]);
+    this.c.fillStyle = gradient;
+    this.c.fill();
+    this.c.restore();
+  };
+
+  this.drawStart = function() {
+    var txt = isMobile() ? 'Tap' : 'Press Spacebar';
+    txt += ' To Start';
+    this.game.ctx.save();
+    this.game.ctx.font = "28px Arial";
+    var len = this.game.ctx.measureText(txt.toUpperCase()).width;
+    this.game.ctx.fillStyle = 'rgba(240, 97, 163, .9)';
+    this.game.ctx.fillRect(
+      (this.game.width / 2) - (len / 2) - 4,
+      (this.game.height / 2) - 18,
+      len+8,
+      36
+    );
+    this.game.ctx.fillStyle = '#fff';
+    this.game.ctx.fillText(txt.toUpperCase(), (this.game.width / 2) - (len / 2), (this.game.height / 2) + 10);
+    this.game.ctx.restore();
+  };
+
+  this.update = function(dt) {
+    this.bg.update(dt);
+  };
+
+  this.draw = function(dt) {
+    this.bg.draw(dt);
+    this.drawTitle();
+    this.drawSubtitle();
+    this.drawStart();
+  };
+
+  this.resize = function() {
+    this.bg.resize();
+  };
+
+  this.keyDown = function(e) {
+    if((e.keyCode === 32|| e.type === 'touchstart')) {
+      this.game.setState('gameplay');
+    }
+  }
+
+  this.bindKeys = function() {
+    document.addEventListener('keydown', this.keyDown);
+    document.addEventListener('touchstart', this.keyDown);
+  };
+
+  this.destroy = function() {
+    document.removeEventListener('keydown', this.keyDown);
+    document.removeEventListener('touchstart', this.keyDown);
+  };
+
+  this.draw = this.draw.bind(this);
+  this.keyDown = this.keyDown.bind(this);
+  this.bindKeys();
+}
+
 // game object
 function Game() {
   this.canvas = document.querySelector('#game');
@@ -765,7 +967,7 @@ function Game() {
   this.halfWidth = this.canvas.width / 2;
   this.halfHeight = this.canvas.height / 2;
   this.states = {
-    // menu: MainMenu,
+    menu: MainMenu,
     gameplay: Gameplay,
   };
   this.currentState = null;
@@ -791,6 +993,7 @@ function Game() {
     if(this.currentState)
       this.currentState.destroy();
     this.currentState = new this.states[stateName](this);
+    this.currentState.resize();
   };
 
   this.update = function(dt) {
@@ -821,5 +1024,5 @@ function Game() {
 
 var game = new Game();
 
-game.setState('gameplay');
+game.setState('menu');
 game.run();
